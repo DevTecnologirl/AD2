@@ -148,18 +148,18 @@
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <label for="mat" class="ColDirMat">Número: 
             <input type="text" class="inpMat"
-             id="mat" name="TxtMatricula" />
+             id="TxtMatricula" name="TxtMatricula" />
             </div>
             <div class="linhaNome">
             <label for="ativ">Atividade:
-             <select>
+             <select id="ativ">
              <option> ----- </option>
              <option>Academia</option>
              <option>Natação</option>
              <option>Combo</option></select> </label>
             &nbsp;&nbsp;
             <label for="plano" class="ColDirMat">Plano: 
-             <select>
+             <select id="plano">
              <option> ----- </option>
              <option>Anual</option>
              <option>Semestral</option>
@@ -181,10 +181,10 @@
              class="inpNCC" id="numCar"/></label><br/>
             </fieldset>
             <div class="linhaNome">
-            <input type="button" value="Matrícula+Plano"> 
-            <label for="TxtTotal" class="ColDirMat">Valor: R$
-            <input type="text" name="TxtTotal" readonly
-             id="TxtTotal" class="inpVal" /></label>
+                <input type="button" value="Matrícula+Plano" onclick="calcularValor()">
+                <label for="TxtTotal" class="ColDirMat">Valor: R$ 
+                <input type="text" name="TxtTotal" readonly id="TxtTotal" class="inpVal" />
+            </label>
             </div>
             </fieldset>
             <p class="entDireita"> 
@@ -198,33 +198,41 @@
     </div>
 
     <script>
-        function validarTelefone() {
-            const telefone = document.getElementById("tel").value;
-            const celular = document.getElementById("cel").value;
-            const telefoneRegex = /^[0-9]{8}$/;  
-            const celularRegex = /^[0-9]{9}$/;   
-            
-            if (!telefoneRegex.test(telefone)) {
-                alert("Número de telefone inválido! Deve conter exatamente 8 dígitos numéricos.");
-                return false;
-            }
-            
-            if (!celularRegex.test(celular)) {
-                alert("Número de celular inválido! Deve conter exatamente 9 dígitos numéricos.");
-                return false;
-            }            
-            if (!/^\d+$/.test(telefone)) {
-                alert("Número de telefone inválido! Deve conter apenas dígitos numéricos.");
-                return false; 
-            }
-            
-            if (!/^\d+$/.test(celular)) {
-                alert("Número de celular inválido! Deve conter apenas dígitos numéricos.");
-                return false;
-            }
-            
-            return true; 
-        }
+    function validarTelefone() {
+    const telefoneFixo = document.getElementById("tel").value;
+    const celular = document.getElementById("cel").value;
+    const regexFixoNumerico = /^\d{10}$/;  
+    const regexCelularNumerico = /^\d{11}$/;  
+    const regexSomenteNumeros = /^\d+$/; 
+    const telefoneFixoLimpo = telefoneFixo.replace(/\D/g, '');
+    const celularLimpo = celular.replace(/\D/g, '');
+
+    if (telefoneFixoLimpo.length !== 10) {
+        alert("O número de telefone fixo deve conter exatamente 10 dígitos.");
+        return false;
+    } else if (!regexSomenteNumeros.test(telefoneFixoLimpo)) {
+        alert("O telefone fixo deve conter apenas números, sem letras ou caracteres especiais.");
+        return false;
+    }
+
+    if (celularLimpo.length !== 11) {
+        alert("O número de celular deve conter exatamente 11 dígitos.");
+        return false;
+    } else if (!regexSomenteNumeros.test(celularLimpo)) {
+        alert("O celular deve conter apenas números, sem letras ou caracteres especiais.");
+        return false;
+    }
+
+    return true; 
+}
+function acionarValidacao(event) {
+    if (event.key === "Enter") {  
+       // validarTelefone(); 
+        document.getElementById("tel").addEventListener("input", validarTelefone);
+        document.getElementById("cel").addEventListener("input", validarTelefone);
+    }
+}
+
         function mudarConteudo(equipo) {
             const dado1 = document.querySelector('.dado1');
             const dado2 = document.querySelector('.dado2');
@@ -247,6 +255,59 @@
                     dado2.innerHTML = '';
             }
         }
+
+        function calcularValor() {
+    const atividadeElement = document.getElementById('ativ');
+    const planoElement = document.getElementById('plano');
+    const matriculadoElement = document.getElementById("mat");
+    const numeroMatriculaElement = document.getElementById('TxtMatricula');
+
+    // Verifica se os elementos existem
+    if (!atividadeElement || !planoElement || !matriculadoElement || !numeroMatriculaElement) {
+        console.error("Um ou mais elementos não foram encontrados no DOM.");
+        return;
+    }
+
+    const atividade = atividadeElement.value;
+    const plano = planoElement.value;
+    const matriculado = matriculadoElement.checked;
+    const numeroMatricula = numeroMatriculaElement.value;
+
+    if (atividade === "-----" || plano === "-----") {
+        alert("Por favor, selecione uma atividade e um plano.");
+        return; 
+    }
+
+    const precos = {
+        'Academia': 180.00,
+        'Natação': 200.00,
+        'Combo': 440.00
+    };
+
+    let valorAtividade = precos[atividade] || 0;
+    let multiplicadorPlano;
+
+    if (plano === 'Anual') {
+        multiplicadorPlano = 12;
+    } else if (plano === 'Semestral') {
+        multiplicadorPlano = 6;
+    } else {
+        multiplicadorPlano = 1;
+    }
+
+    let valorTotal = valorAtividade * multiplicadorPlano;
+
+    if (!matriculado || numeroMatricula === "") {
+        const valorMatricula = 80.00;
+        valorTotal += valorMatricula;
+    }
+
+    console.log('Valor Total Calculado:', valorTotal);
+    document.getElementById("TxtTotal").value = valorTotal.toFixed(2);
+}
+
+
+
     </script>
 </body>
 
